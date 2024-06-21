@@ -36,3 +36,8 @@ nano .env
 go run main.go
 ```
 
+If you want to monitoring your total transaction on sonic, just paste your Authorization value from sonic server.you can get it using devtools and go to network tab > choose fetch/XHR then search "daily". you will see your jwt token there.
+
+![image](https://github.com/StephanieAgatha/sonic-sol/assets/62786809/88c14ef1-838d-4ba6-b2c2-7238487c7c77)
+
+copy and input your jwt token to bot
