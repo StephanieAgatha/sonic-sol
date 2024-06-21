@@ -40,4 +40,9 @@ If you want to monitoring your total transaction on sonic, just paste your Autho
 
 ![image](https://github.com/StephanieAgatha/sonic-sol/assets/62786809/88c14ef1-838d-4ba6-b2c2-7238487c7c77)
 
-copy and input your jwt token to bot
+copy and input your jwt token to bot.
+
+and if you see "failed to send transaction xxxx, timeout with tx signature about (looks like this picture) 
+![image](https://github.com/StephanieAgatha/sonic-sol/assets/62786809/83fc47dd-6bb5-477c-a8d4-b196c9e3f255)
+
+it's fine,let bot run
