@@ -18,8 +18,9 @@ echo export PATH=$HOME/go/bin:/usr/local/go/bin:$PATH >> ~/.profile
 source ~/.profile
 ```
 
+clone repo
 ```shell
-https://github.com/StephanieAgatha/sonic-sol.git
+git clonehttps://github.com/StephanieAgatha/sonic-sol.git
 ```
 
 ```shell
