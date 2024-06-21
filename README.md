@@ -20,7 +20,7 @@ source ~/.profile
 
 clone repo
 ```shell
-git clonehttps://github.com/StephanieAgatha/sonic-sol.git
+git clone https://github.com/StephanieAgatha/sonic-sol.git
 ```
 
 ```shell
