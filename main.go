@@ -56,18 +56,27 @@ func main() {
 		log.Fatalf("No balance available")
 	}
 
-	// print balance
+	// Print balance
 	fmt.Printf("Balance: %.9f SOL\n", float64(balance)/1_000_000_000)
 
+	// Get number of addresses to generate
+	fmt.Print("How many addresses do you want to generate: ")
+	reader := bufio.NewReader(os.Stdin)
+	addressCountInput, _ := reader.ReadString('\n')
+	addressCountInput = strings.TrimSpace(addressCountInput)
+	addressCount, err := strconv.Atoi(addressCountInput)
+	if err != nil {
+		log.Fatalf("Invalid number of addresses: %v", err)
+	}
+
 	// Ensure enough balance to send to all addresses
-	requiredBalance := solAmount * 5
+	requiredBalance := solAmount * uint64(addressCount)
 	if balance < requiredBalance {
 		log.Fatalf("Insufficient balance. Required: %d, Available: %d", requiredBalance, balance)
 	}
 
 	// Get delay
 	fmt.Print("Masukkan delay (dalam detik): ")
-	reader := bufio.NewReader(os.Stdin)
 	delayInput, _ := reader.ReadString('\n')
 	delayInput = strings.TrimSpace(delayInput)
 	delay, err := strconv.Atoi(delayInput)
@@ -75,16 +84,13 @@ func main() {
 		log.Fatalf("Invalid delay input: %v", err)
 	}
 
-	// Generate 5 random addresses
+	// Generate random addresses
 	var addresses []solana.PublicKey
-	for i := 0; i < 5; i++ {
+	for i := 0; i < addressCount; i++ {
 		newKeypair := generateRandomKeypair()
 		addresses = append(addresses, newKeypair.PublicKey())
 		fmt.Printf("Generated address %d: %s\n", i+1, newKeypair.PublicKey())
 	}
-
-	fmt.Println("==========================")
-	fmt.Println("")
 
 	// Send 0.001 SOL to each address
 	for _, address := range addresses {
@@ -120,7 +126,7 @@ func main() {
 			panic(fmt.Errorf("unable to sign transaction: %w", err))
 		}
 
-		// print it
+		// Print sending status
 		fmt.Printf("Sending 0.001 SOL to %s, waiting for confirmation...\n", address)
 
 		// Send transaction, and wait for confirmation
