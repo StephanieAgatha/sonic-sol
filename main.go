@@ -3,8 +3,11 @@ package main
 import (
 	"bufio"
 	"context"
+	"encoding/json"
 	"fmt"
+	"io/ioutil"
 	"log"
+	"net/http"
 	"os"
 	"strconv"
 	"strings"
@@ -76,13 +79,18 @@ func main() {
 	}
 
 	// Get delay
-	fmt.Print("Masukkan delay (dalam detik): ")
+	fmt.Print("Input delay (dalam detik): ")
 	delayInput, _ := reader.ReadString('\n')
 	delayInput = strings.TrimSpace(delayInput)
 	delay, err := strconv.Atoi(delayInput)
 	if err != nil {
 		log.Fatalf("Invalid delay input: %v", err)
 	}
+
+	// Get Authorization value from user
+	fmt.Print("Enter Authorization key (or press enter to skip): ")
+	authKey, _ := reader.ReadString('\n')
+	authKey = strings.TrimSpace(authKey)
 
 	// Generate random addresses
 	var addresses []solana.PublicKey
@@ -143,6 +151,14 @@ func main() {
 		}
 		spew.Dump(sig)
 
+		//if user input a jwt token then fetch tx total
+		if authKey != "" {
+			fmt.Println("==================")
+			fmt.Println("Fetch transaction from sonic server ...")
+			getTxMilestone(authKey)
+			fmt.Println("==================")
+		}
+
 		// Delay
 		time.Sleep(time.Duration(delay) * time.Second)
 	}
@@ -154,4 +170,67 @@ func generateRandomKeypair() solana.PrivateKey {
 		log.Fatalf("Failed to generate random keypair: %v", err)
 	}
 	return keypair
+}
+
+func readAddresses(filename string) ([]string, error) {
+	file, err := os.Open(filename)
+	if err != nil {
+		return nil, err
+	}
+	defer file.Close()
+
+	var addresses []string
+	scanner := bufio.NewScanner(file)
+	for scanner.Scan() {
+		address := strings.TrimSpace(scanner.Text())
+		if address != "" {
+			addresses = append(addresses, address)
+		}
+	}
+	if err := scanner.Err(); err != nil {
+		return nil, err
+	}
+	return addresses, nil
+}
+
+func getTxMilestone(authKey string) {
+	url := "https://odyssey-api.sonic.game/user/transactions/state/daily"
+	method := "GET"
+
+	client := &http.Client{}
+	req, err := http.NewRequest(method, url, nil)
+	if err != nil {
+		fmt.Println(err)
+		return
+	}
+	req.Header.Add("Authorization", authKey)
+
+	res, err := client.Do(req)
+	if err != nil {
+		fmt.Println(err)
+		return
+	}
+	defer res.Body.Close()
+
+	body, err := ioutil.ReadAll(res.Body)
+	if err != nil {
+		fmt.Println(err)
+		return
+	}
+
+	var result map[string]interface{}
+	if err := json.Unmarshal(body, &result); err != nil {
+		fmt.Println("Failed to unmarshal response:", err)
+		return
+	}
+
+	if data, ok := result["data"].(map[string]interface{}); ok {
+		if totalTransactions, ok := data["total_transactions"].(float64); ok {
+			fmt.Printf("Total transactions: %.0f\n", totalTransactions)
+		} else {
+			fmt.Println("total_transactions not found ", err.Error())
+		}
+	} else {
+		fmt.Println("failed to fetch data", err.Error())
+	}
 }
