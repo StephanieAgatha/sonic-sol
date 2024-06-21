@@ -17,7 +17,6 @@ package main
 //	"github.com/gagliardetto/solana-go/rpc"
 //	confirm "github.com/gagliardetto/solana-go/rpc/sendAndConfirmTransaction"
 //	"github.com/gagliardetto/solana-go/rpc/ws"
-//	"github.com/gagliardetto/solana-go/text"
 //	"github.com/joho/godotenv"
 //)
 //
@@ -34,10 +33,11 @@ package main
 //		log.Fatalf("Private key is not set in .env file")
 //	}
 //
+//	// Generate keypair
 //	accountFrom := solana.MustPrivateKeyFromBase58(privateKeyBase58)
 //
-//	rpcClient := rpc.New(rpc.DevNet_RPC)
-//	wsClient, err := ws.Connect(context.Background(), "wss://devnet.sonic.game/")
+//	rpcClient := rpc.New("https://devnet.sonic.game")
+//	wsClient, err := ws.Connect(context.Background(), rpc.DevNet_WS)
 //	if err != nil {
 //		panic(err)
 //	}
@@ -57,15 +57,16 @@ package main
 //		log.Fatalf("No balance available")
 //	}
 //
+//	// print balance
 //	fmt.Printf("Balance: %.9f SOL\n", float64(balance)/1_000_000_000)
 //
-//	//read address nya
+//	// read
 //	addresses, err := readAddresses("address.txt")
 //	if err != nil {
-//		log.Fatalf("Failed to read addresses: %v", err)
+//		log.Fatalf("Failed to read address file: %v", err)
 //	}
 //
-//	// ensure enough balance
+//	// check if address have enough balance -_-
 //	requiredBalance := solAmount * uint64(len(addresses))
 //	if balance < requiredBalance {
 //		log.Fatalf("Insufficient balance. Required: %d, Available: %d", requiredBalance, balance)
@@ -81,7 +82,7 @@ package main
 //		log.Fatalf("Invalid delay input: %v", err)
 //	}
 //
-//	// Send 0.001 SOL to each address with delay
+//	// Send 0.001 SOL to each address
 //	for _, addressStr := range addresses {
 //		address := solana.MustPublicKeyFromBase58(addressStr)
 //
@@ -116,10 +117,11 @@ package main
 //		if err != nil {
 //			panic(fmt.Errorf("unable to sign transaction: %w", err))
 //		}
-//		spew.Dump(tx)
-//		//print it !
-//		tx.EncodeTree(text.NewTreeEncoder(os.Stdout, "Transfer SOL"))
 //
+//		// print it
+//		fmt.Printf("Sending 0.001 SOL to %s, waiting for confirmation...\n", address)
+//
+//		// Send transaction, and wait for confirmation
 //		sig, err := confirm.SendAndConfirmTransaction(
 //			context.TODO(),
 //			rpcClient,
@@ -129,7 +131,7 @@ package main
 //		if err != nil {
 //			log.Printf("Failed to send transaction to %s: %v", address, err)
 //		} else {
-//			fmt.Printf("Sent %d lamports to %s\n", solAmount, address)
+//			fmt.Printf("Success sending to %s with signature %s\n", address, sig)
 //		}
 //		spew.Dump(sig)
 //

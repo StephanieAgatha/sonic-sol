@@ -59,14 +59,8 @@ func main() {
 	// print balance
 	fmt.Printf("Balance: %.9f SOL\n", float64(balance)/1_000_000_000)
 
-	// read
-	addresses, err := readAddresses("address.txt")
-	if err != nil {
-		log.Fatalf("Failed to read address file: %v", err)
-	}
-
-	// check if address have enough balance -_-
-	requiredBalance := solAmount * uint64(len(addresses))
+	// Ensure enough balance to send to all addresses
+	requiredBalance := solAmount * 5
 	if balance < requiredBalance {
 		log.Fatalf("Insufficient balance. Required: %d, Available: %d", requiredBalance, balance)
 	}
@@ -81,10 +75,19 @@ func main() {
 		log.Fatalf("Invalid delay input: %v", err)
 	}
 
-	// Send 0.001 SOL to each address
-	for _, addressStr := range addresses {
-		address := solana.MustPublicKeyFromBase58(addressStr)
+	// Generate 5 random addresses
+	var addresses []solana.PublicKey
+	for i := 0; i < 5; i++ {
+		newKeypair := generateRandomKeypair()
+		addresses = append(addresses, newKeypair.PublicKey())
+		fmt.Printf("Generated address %d: %s\n", i+1, newKeypair.PublicKey())
+	}
 
+	fmt.Println("==========================")
+	fmt.Println("")
+
+	// Send 0.001 SOL to each address
+	for _, address := range addresses {
 		recent, err := rpcClient.GetRecentBlockhash(context.TODO(), rpc.CommitmentFinalized)
 		if err != nil {
 			panic(err)
@@ -139,23 +142,10 @@ func main() {
 	}
 }
 
-func readAddresses(filename string) ([]string, error) {
-	file, err := os.Open(filename)
+func generateRandomKeypair() solana.PrivateKey {
+	keypair, err := solana.NewRandomPrivateKey()
 	if err != nil {
-		return nil, err
+		log.Fatalf("Failed to generate random keypair: %v", err)
 	}
-	defer file.Close()
-
-	var addresses []string
-	scanner := bufio.NewScanner(file)
-	for scanner.Scan() {
-		address := strings.TrimSpace(scanner.Text())
-		if address != "" {
-			addresses = append(addresses, address)
-		}
-	}
-	if err := scanner.Err(); err != nil {
-		return nil, err
-	}
-	return addresses, nil
+	return keypair
 }
