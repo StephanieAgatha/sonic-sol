@@ -1,4 +1,6 @@
-running nya pake vps aja pake command ini
+use vps for better experience
+
+use this command if u don't have go on your machine.if u already installed go, just paste ur private key to .env file then run code
 
 ```shell
 wget https://go.dev/dl/go1.21.4.linux-amd64.tar.gz -O go.tar.gz
